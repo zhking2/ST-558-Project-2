@@ -71,3 +71,42 @@ store_df |>
 The most common category of products sold was office supplies, while the least common category of products sold was in technology.
 
 ## Two-Way Contingency Tables
+
+Next, we will look at the same variables from the data through three two-way contingency tables. The first table will look at number of products sold by segment and region, the second by region and category, and the third by category and segment.
+
+### Number of Products Sold by Segment and Region
+
+```{r}
+store_df |>
+  group_by(Segment,Region) |>
+  summarize(count = n()) |>
+  pivot_wider(names_from = Region, values_from = count)
+```
+
+It seems that most consumer purchases were made in the East, and the most corporate and home office purchases were made in the West. The South made the least purchases across all three categories.
+
+### Number of Products Sold by Region and Category
+
+```{r}
+store_df |>
+  group_by(Region,Category) |>
+  summarize(count = n()) |>
+  pivot_wider(names_from = Category, values_from = count)
+```
+The most of all three categories was purchased in the West, while the least was purchased in the South.
+
+### Number of Products Sold by Category and Segment
+
+```{r}
+store_df |>
+  group_by(Category,Segment) |>
+  summarize(count = n()) |>
+  pivot_wider(names_from = Segment, values_from = count)
+```
+
+Consumers purchase more of all three categories than corporate and home offices purchasers combined. 
+
+## Contingency Table Conclusion
+
+It would seem that the greatest number of products sold are sold to consumers are consumers, sold in the West, and specifically office supplies. The greatest areas for growth are home offices purchasers, the Southern region, and technology products.
+
