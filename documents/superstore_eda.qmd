@@ -1,0 +1,73 @@
+---
+title: "superstore_eda"
+format: html
+---
+
+# Introduction
+
+This document is dedicated to doing exploratory data analysis on the superstore dataset. In this dataset, each row corresponds with a purchase of an individual product made by a customer. For orders with multiple products purchased, each individual product has it's own row, but the order number remains the same for the entire order.
+
+The selected variables in this dataset are described below:
+
+| Variable     | Description                                 |              Type |
+|-----------------------------|:-------------------|----------------------:|
+| OrderID      | Order number for the entire purchase made.  |         Character |
+| OrderDate    | Date on which the order was placed.         |              Date |
+| ShipDate     | Date on which the order was shipped.        |              Date |
+| ShipMode     | Method by which the order was shipped.      |            Factor |
+| CustomerID   | ID Assigned to Customer.                    |           Numeric |
+| CustomerName | Name of customer.                           |         Character |
+| Segment      | Category of purchaser type/purpose.         |            Factor |
+| City         | City in which the order was placed.         |            Factor |
+| State        | State in which the order was placed.        |            Factor |
+| PostalCode   | Postal code in which the order was placed.  |           Numeric |
+| Region       | Region in which the order was placed.       |            Factor |
+| ProductID    | ID assigned to the product.                 |          Charcter |
+| Category     | Category of the product type.               |            Factor |
+| Subcategory  | Subcategory of the product type.            |            Factor |
+| ProductName  | Full name of the product.                   |         Character |
+| Sales        | Selling price of the product.               |           Numeric |
+| Quantity     | Number of quantity AVAILABLE of the product | Numeric (Integer) |
+| Discount     | Discount available on each product          |           Numeric |
+| Profit       | Profit gained on the product.               |           Numeric |
+
+Note: The raw dataset includes 2 additional variables, RowID and Country, which are both redundant (RowID is just row number, Country is always US), and thus were removed.
+
+# Contingency Tables
+
+## One-Way Contingency Tables
+
+I will create three one-way contingency tables. The first will count the number of products sold by consumer segment, the second will count by region, and the final will count by category of the product.
+
+### Number of Products Sold by Segment (Consumer Category)
+
+First, we will tally the number of purchases by the consumer type, known as the segment.
+
+```{r}
+store_df |>
+  group_by(Segment) |>
+  summarize(count = n())
+```
+
+The greatest number of purchases were made by average consumers, followed by corporate purchases, and finally home offices.
+
+### Number of Products Sold by Region
+
+```{r}
+store_df |>
+  group_by(Region) |>
+  summarize(count = n())
+```
+The most products were sold in the West region, and the least were sold in the South region. 
+
+### Number of Products Sold by Product Category
+
+```{r}
+store_df |>
+  group_by(Category) |>
+  summarize(count = n())
+```
+
+The most common category of products sold was office supplies, while the least common category of products sold was in technology.
+
+## Two-Way Contingency Tables
