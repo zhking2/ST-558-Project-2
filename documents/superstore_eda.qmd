@@ -15,14 +15,14 @@ The selected variables in this dataset are described below:
 | OrderDate    | Date on which the order was placed.         |              Date |
 | ShipDate     | Date on which the order was shipped.        |              Date |
 | ShipMode     | Method by which the order was shipped.      |            Factor |
-| CustomerID   | ID Assigned to Customer.                    |           Numeric |
+| CustomerID   | ID Assigned to Customer.                    |         Character |
 | CustomerName | Name of customer.                           |         Character |
 | Segment      | Category of purchaser type/purpose.         |            Factor |
 | City         | City in which the order was placed.         |            Factor |
 | State        | State in which the order was placed.        |            Factor |
 | PostalCode   | Postal code in which the order was placed.  |           Numeric |
 | Region       | Region in which the order was placed.       |            Factor |
-| ProductID    | ID assigned to the product.                 |          Charcter |
+| ProductID    | ID assigned to the product.                 |         Character |
 | Category     | Category of the product type.               |            Factor |
 | Subcategory  | Subcategory of the product type.            |            Factor |
 | ProductName  | Full name of the product.                   |         Character |
@@ -58,7 +58,8 @@ store_df |>
   group_by(Region) |>
   summarize(count = n())
 ```
-The most products were sold in the West region, and the least were sold in the South region. 
+
+The most products were sold in the West region, and the least were sold in the South region.
 
 ### Number of Products Sold by Product Category
 
@@ -93,6 +94,7 @@ store_df |>
   summarize(count = n()) |>
   pivot_wider(names_from = Category, values_from = count)
 ```
+
 The most of all three categories was purchased in the West, while the least was purchased in the South.
 
 ### Number of Products Sold by Category and Segment
@@ -104,9 +106,53 @@ store_df |>
   pivot_wider(names_from = Segment, values_from = count)
 ```
 
-Consumers purchase more of all three categories than corporate and home offices purchasers combined. 
+Consumers purchase more of all three categories than corporate and home offices purchasers combined.
 
 ## Contingency Table Conclusion
 
 It would seem that the greatest number of products sold are sold to consumers are consumers, sold in the West, and specifically office supplies. The greatest areas for growth are home offices purchasers, the Southern region, and technology products.
 
+# Numerical Summaries
+
+In order to gain a greater understanding of the numeric side of the data, we need to find basic numerical summaries for our numeric variables, which include Sales, Quantity, Discount, and Profit.
+
+We will start by looking at these variables on the baseline level, and then will group them by our headline categorical variables to find more specific insights.
+
+## General Numerical Summaries
+
+```{r}
+store_df |>
+  summarize(across(where(is.numeric), 
+                   list("mean" = ~ mean(.x, na.rm = TRUE), "median" = ~ median(.x, na.rm = TRUE)), 
+                   .names = "{.fn} {.col}"))
+```
+
+Since Sales represents price, the average price of the products sold is \$229.86, which is much higher than our median price of \$54.49. This implies that most of what is sold is lower ticket items, while there are a few stand-out high ticket items which pull up the average.
+
+The average quantity we have on hand is 3.78, which is greater than the median quantity on hand. This implies that most items are not stocked in larger numbers, but a few are stocked in higher quantities.
+
+The average discount of around 15\% is lower than the median discount of 20\%. This is most likely because some items are not on discount at all, which drags the mean down, even if most items do have some discount.
+
+The profit situation is similar to that of sales price, wil the mean profit of $28.66 being much higher than the median of \$8.67, most likely for the same reason.
+
+## Specific Numerical Summaries
+
+We will start with numerical summaries individually by region, segment, and category, and then we will cross of variables of interest for additionally summaries.
+
+### Region Numerical Summaries
+
+```{r}
+store_df |>
+  group_by(Region) |>
+  summarize(across(where(is.numeric), 
+                   list("mean" = ~ mean(.x, na.rm = TRUE), "median" = ~ median(.x, na.rm = TRUE)), 
+                   .names = "{.fn}_{.col}"))
+```
+
+Despite the number of products sold in the South region being the lowest (as found in the contingency tables section), the average price per product sold is the highest in the Southern region. However, the highest median price per product is highest in the West. This implies that the South buys more high-ticket items to drag up the mean, while the smaller-ticket items sold in the West generally cost more.
+
+Quantities kept on hand are fairly static across our regions.
+
+As for discounts, the average is highest in the Central Region and Lowest in the West region, with the median being lower than the mean for all regions, implying that most items are not on sale, but there is the occasional "big sale". 
+
+Mean and median profit is highest in the West, and lowest in the Central Region, with the difference between mean and median being similar to the general statistics.
