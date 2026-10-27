@@ -6,3 +6,9 @@ n_vars <- c(
   "Quantity" = "Quantity",
   "Discount" = "Discount"
 )
+
+c_vars <- c(
+  "Region" = "Region",
+  "Segment" = "Segment",
+  "Category" = "Category"
+)
