@@ -33,6 +33,8 @@ The selected variables in this dataset are described below:
 
 Note: The raw dataset includes 2 additional variables, RowID and Country, which are both redundant (RowID is just row number, Country is always US), and thus were removed.
 
+For the sake of simplicity, the categorical variables I will be focusing on are Region, Segment, and Category, as they are of greatest interest to me.
+
 # Contingency Tables
 
 ## One-Way Contingency Tables
@@ -156,3 +158,171 @@ Quantities kept on hand are fairly static across our regions.
 As for discounts, the average is highest in the Central Region and Lowest in the West region, with the median being lower than the mean for all regions, implying that most items are not on sale, but there is the occasional "big sale". 
 
 Mean and median profit is highest in the West, and lowest in the Central Region, with the difference between mean and median being similar to the general statistics.
+
+
+### Segment Numerical Summaries
+
+```{r}
+store_df |>
+  group_by(Segment) |>
+  summarize(across(where(is.numeric), 
+                   list("mean" = ~ mean(.x, na.rm = TRUE), "median" = ~ median(.x, na.rm = TRUE)), 
+                   .names = "{.fn}_{.col}"))
+```
+
+Despite Home Office having the lowest number of products sold, it has the highest average price per item, though the lowest median price. This implies that Home Office purchasers buy the highest ticket items, but mostly lower ticket items in terms of quantity.
+
+### Category Numerical Summaries
+
+```{r}
+store_df |>
+  group_by(Category) |>
+  summarize(across(where(is.numeric), 
+                   list("mean" = ~ mean(.x, na.rm = TRUE), "median" = ~ median(.x, na.rm = TRUE)), 
+                   .names = "{.fn}_{.col}"))
+```
+
+Office supplies were found to be the most frequent purchase, but unsurprisingly they have the lowest mean and median sales price. 
+Technology, which was the least frequent purchase, has the highest average price, while furniture has the highest median. This implies the tech has the highest ticket items, but also a large number of lower ticket items, while furniture items generally cost more, but don't usually reach the high ticket cost of the most expensive tech items.
+
+### Region and Segment Numerical Summaries
+
+```{r}
+store_df |>
+  group_by(Region, Segment) |>
+  summarize(across(where(is.numeric), 
+                   list("mean" = ~ mean(.x, na.rm = TRUE), "median" = ~ median(.x, na.rm = TRUE)), 
+                   .names = "{.fn}_{.col}"))
+```
+
+The highest average product price was for Home Offices in the South, while the highest median product price was for Corporate purchases in the East. The lowest average product price was for Consumers in the Central Region,  while the lowest median product price was for Corporate purchases in the Central Region.
+
+
+### Segment and Category Numerical Summaries
+
+```{r}
+store_df |>
+  group_by(Segment, Category) |>
+  summarize(across(where(is.numeric), 
+                   list("mean" = ~ mean(.x, na.rm = TRUE), "median" = ~ median(.x, na.rm = TRUE)), 
+                   .names = "{.fn}_{.col}"))
+```
+
+The highest mean and median sales are Home Office Technology purchases. The lowest mean sales are Home Office Office Supplies, and the lowest median sales are Consumer Office Supplies. 
+
+### Category and Region Numerical Summaries
+
+```{r}
+store_df |>
+  group_by(Category, Region) |>
+  summarize(across(where(is.numeric), 
+                   list("mean" = ~ mean(.x, na.rm = TRUE), "median" = ~ median(.x, na.rm = TRUE)), 
+                   .names = "{.fn}_{.col}"))
+```
+
+
+The highest mean product price is Technology purchases in the east, and the highest median product price is furniture purchases in the west. The lowest mean product price is Office Supplies in the West, and the lowest median product price is Office Supplies in the Central Region.
+
+# Graphical Summaries
+
+## Bar Charts 
+
+### Frequency Bar Charts
+
+First, I will make bar charts for sales frequency based on Region, Segment, and Category.
+
+```{r}
+ggplot(data=store_df,aes(x=Region,fill=Region))+
+  geom_bar()+
+  labs(y="Frequency",title="Frequency of Product Purchases by Region")+
+  theme_minimal()
+ggplot(data=store_df,aes(x=Category,fill=Category))+
+  geom_bar()+
+  labs(y="Frequency",title="Frequency of Product Purchases by Category")+
+  theme_minimal()
+ggplot(data=store_df,aes(x=Segment,fill=Segment))+
+  geom_bar()+
+  labs(y="Frequency",title="Frequency of Product Purchases by Segment")+
+  theme_minimal()
+```
+
+### Sales Bar Charts
+
+Next, I will make bar charts for total sales based on Region, Segment, and Category.
+
+```{r}
+ggplot(data=store_df,aes(x=Region,y=Sales,fill=Region))+
+  geom_col()+
+  labs(title="Total Sales by Region")+
+  theme_minimal()
+ggplot(data=store_df,aes(x=Category,y=Sales,fill=Category))+
+  geom_col()+
+  labs(title="Total Sales by Category")+
+  theme_minimal()
+ggplot(data=store_df,aes(x=Segment,y=Sales,fill=Segment))+
+  geom_col()+
+  labs(title="Total Sales by Segment")+
+  theme_minimal()
+```
+## Side-by-Side Bar Charts
+
+Moving on from simple bar charts, we will make Side-by-Side Bar Charts for Sales based on combinations of our categorical variables.
+
+```{r}
+ggplot(store_df, aes(fill=Region, y=Sales, x=Segment)) + 
+    geom_bar(position="dodge", stat="identity")
+ggplot(store_df, aes(fill=Region, y=Sales, x=Category)) + 
+    geom_bar(position="dodge", stat="identity")
+ggplot(store_df, aes(fill=Category, y=Sales, x=Segment)) + 
+    geom_bar(position="dodge", stat="identity")
+```
+
+## Histograms
+
+Next up, I will create histograms to view the distribution of product prices and profit per item. For these histograms, we run into a scaling problem, where the histogram is essentially illegible if all values are visible. 
+
+Thus, I adjusted the domain and range of of the graphs, as the out of bounds values were so small they weren't visible anyway, at least not without making the bins so large that the graph becomes useless.
+
+```{r}
+ggplot(store_df, aes(x = Sales)) + 
+    geom_histogram(binwidth = 250, fill = "blue")+
+  xlim(0, 6000) +
+  ylim(0, 2000) +
+  labs(x = "Product Price",y = "Frequency",title = "Frequency of Product Prices")
+ggplot(store_df, aes(x = Profit)) + 
+    geom_histogram(binwidth = 100, fill = "blue")+
+  xlim(-800, 800) +
+  ylim(0, 8000) +
+  labs(x = "Profit Amount",y = "Frequency",title = "Frequency of Profit Amounts")
+```
+## Box Plots
+
+For the sake of trying pretty much every graph type, here's a grouped box plot. For this particular dataset, these plots aren't particularly appealing to look at, but it is kind of interesting.
+
+```{r}
+ggplot(store_df, aes(fill=Region, y=Sales, x=Segment)) + 
+    geom_boxplot()
+ggplot(store_df, aes(fill=Region, y=Sales, x=Category)) + 
+    geom_boxplot()
+ggplot(store_df, aes(fill=Category, y=Sales, x=Segment)) + 
+    geom_boxplot()
+```
+
+## Scatter Plot
+
+Now this is a fascinating scatter plot. Obviously, you'd expect a fairly standard linear relationship, and while that's sort of true, you can also see the effect of discount/clearance sales for below profitability. 
+
+```{r}
+ggplot(store_df, aes(x=Sales,y=Profit,color=Region)) + 
+    geom_point()
+```
+
+## Violin Plot
+
+The Violin plot below shows the distribution of the Profit grouped by region and color coded by Segment. I've never used this kind of plot before, and I really like it.
+
+```{r}
+ggplot(store_df, aes(x=Profit,y=Region,color=Segment,fill=Segment)) + 
+    geom_violin()
+```
+

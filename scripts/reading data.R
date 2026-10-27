@@ -6,7 +6,7 @@ raw_data <- read_excel("data/ussuperstoredata.xls",skip = 1, col_names =
                            "Segment","Country","City","State","PostalCode","Region","ProductID",
                            "Category","Subcategory","ProductName","Sales","Quantity","Discount","Profit"))
 clean_data <- raw_data |>
-  select(-"RowID") |>
-  mutate(across(c(ShipMode, Segment, Country, City, State, PostalCode, Region, Category,Subcategory), as.factor))
+  select(-"RowID", -"Country") |>
+  mutate(across(c(ShipMode, Segment, City, State, PostalCode, Region, Category,Subcategory), as.factor))
 
 saveRDS(clean_data,file="data/store_df.rds")
