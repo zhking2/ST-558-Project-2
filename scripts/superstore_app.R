@@ -27,7 +27,7 @@ sidebar = sidebar(
               choices = c("None" = "none", n_vars),
               selected = "none"),
   h3("Choose the Range:"),
-  uiOutput("MAKESLIDER1"),
+  uiOutput("nslide1"),
   h3("Choose Second Numeric Variable"),
   selectInput("nvar2",
               "Second",
@@ -147,3 +147,6 @@ navset_tab(
     )
   )
 )
+
+server <- function(input, output, session) {
+  output$nslide1 <- renderUI()
