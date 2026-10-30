@@ -283,6 +283,8 @@ Next up, I will create histograms to view the distribution of product prices and
 
 Thus, I adjusted the domain and range of of the graphs, as the out of bounds values were so small they weren't visible anyway, at least not without making the bins so large that the graph becomes useless.
 
+I also chose to add faceting to the second plot, as we haven't previously explored the interaction between profit and our categorical variables.
+
 ```{r}
 ggplot(store_df, aes(x = Sales)) + 
     geom_histogram(binwidth = 250, fill = "blue")+
@@ -293,7 +295,8 @@ ggplot(store_df, aes(x = Profit)) +
     geom_histogram(binwidth = 100, fill = "blue")+
   xlim(-800, 800) +
   ylim(0, 8000) +
-  labs(x = "Profit Amount",y = "Frequency",title = "Frequency of Profit Amounts")
+  labs(x = "Profit Amount",y = "Frequency",title = "Frequency of Profit Amounts")+
+  facet_wrap(vars(Region))
 ```
 ## Box Plots
 
@@ -317,12 +320,4 @@ ggplot(store_df, aes(x=Sales,y=Profit,color=Region)) +
     geom_point()
 ```
 
-## Violin Plot
-
-The Violin plot below shows the distribution of the Profit grouped by region and color coded by Segment. I've never used this kind of plot before, and I really like it.
-
-```{r}
-ggplot(store_df, aes(x=Profit,y=Region,color=Segment,fill=Segment)) + 
-    geom_violin()
-```
 
