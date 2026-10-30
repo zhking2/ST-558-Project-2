@@ -55,6 +55,7 @@ bar_plot <- function(data, v1, v2, facet, position) {
     ) +
     theme_minimal()}
 
+# all the plots for the numerical variables
 
 fancy_plot <- function(data, plot_type, v1, sv2, group, facet) {
   if (plot_type == "histogram") {
@@ -62,7 +63,7 @@ fancy_plot <- function(data, plot_type, v1, sv2, group, facet) {
     f <- if (group == "none") {f + geom_histogram(bins = 100, fill = "blue")} 
          else { f + geom_histogram(aes(fill = .data[[group]]),bins = 40,position = "identity")}
     f <- f + labs(title = paste("Distribution of", var_label(v1)), y = "Number of Individual Product Sales") } 
-  else if (plot_type == "box") {
+  else if (plot_type == "boxplot") {
     f <- if (group == "none") {ggplot(data, aes(x = "All sales", y = .data[[v1]])) +
         geom_boxplot(fill = "blue")} 
          else {ggplot(data, aes(x = .data[[group]], y = .data[[v1]], fill = .data[[group]])) +
@@ -81,3 +82,19 @@ fancy_plot <- function(data, plot_type, v1, sv2, group, facet) {
   if (facet != "none") {
     f <- f + facet_wrap(vars(.data[[facet]]))}
   f + theme_minimal()}
+
+# slider for numerical range:
+
+nslider <- function(id, var, data) {
+  if (var == "none") {
+    return(NULL)
+  }
+  ranger <- range(data[[var]])
+  sliderInput(
+    id,
+    label = paste("Range for", names(n_vars)[n_vars == var]),
+    min = floor(ranger[1]),
+    max = ceiling(ranger[2]),
+    value = c(floor(ranger[1]), ceiling(ranger[2]))
+  )
+}

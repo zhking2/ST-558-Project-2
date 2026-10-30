@@ -2,6 +2,10 @@
 title: "superstore_eda"
 format: html
 ---
+```{r}
+library(tidyverse)
+```
+
 
 # Introduction
 

@@ -4,7 +4,7 @@ library(bslib)
 library(DT)
 library(tidyverse)
 
-source("helpers.R")
+source("scripts/helpers.R")
 store_df <- readRDS("data/store_df.rds")
 
 
@@ -130,13 +130,12 @@ navset_tab(
           choices = c(
             "Histogram" = "histogram",
             "Scatterplot" = "scatterplot",
-            "Box Plot" = "boxplot",
-            "Violin Plot" = "violin"
+            "Box Plot" = "boxplot"
             )),
         conditionalPanel(
               "input.num_plot == 'scatterplot'",
               selectInput(
-                "scaty",
+                "sv2",
                 "Secondary Numeric Variable",
                 choices = n_vars,
                 selected = "distance"))))),
@@ -149,4 +148,91 @@ navset_tab(
 )
 
 server <- function(input, output, session) {
-  output$nslide1 <- renderUI()
+  # input sliders for the subset tab
+  output$nslide1 <- renderUI(nslider ("nr1", input$nvar1, store_df ))
+  output$nslide2 <- renderUI(nslider ("nr2", input$nvar2, store_df ))
+  
+  # creating the reactive values button for subsetting
+  subset <- reactiveValues(data = store_df)
+  observeEvent(input$subset_but, {
+    subset$data <- store_df |>
+      filter(Category %in% input$Category, Region %in% input$Region) |>
+      filter_num_range(input$nvar1, input$nslide1) |>
+      filter_num_range(input$nvar1, input$nslide2)
+  })
+  
+  # 
+  re_data <- reactive({
+    data <- subset_vals$data
+    validate(need(
+      nrow(data) > 0,
+      "No individual product sales match."))
+    
+    if (input$summary_type == "cat") {
+      validate(need(
+        input$cat_var1 != input$cat_var2,
+        "Chosen categorical variables must be different"))}
+      if (input$num_plot == "scatter") {
+        validate(need(
+          input$scatter_x != input$num_var,
+          "Chosen numerical variables must be different."))}}
+    data)
+
+  output$findplot <- renderPlot({
+    data <- re_data()
+    if (input$summary_type == "cat") {
+      bar_plot(
+        data,
+        input$cvar1,
+        input$cvar2,
+        input$cfacet,
+        input$bstyle
+      )
+    } else {
+      fancy_plot(
+        data,
+        input$gstyle,
+        input$nvar1,
+        input$scaty,
+        input$gvar1,
+        input$nfacet
+      )
+    }
+  })
+  output$fintable <- renderTable(
+    {
+      data <- re_data()
+      if (input$summary_type == "c") {
+        freq_table(data, input$cvar1, input$cvar2)
+      } else {
+        n_summary(data, input$nvar1, input$gvar1)
+      }
+    },
+    digits = 1,
+    format.args = list(big.mark = ",")
+  )
+  
+  # Data table of the (possibly subsetted) data
+  output$data_table <- DT::renderDataTable({
+    DT::datatable(
+      subset_vals$data,
+      options = list(pageLength = 10, scrollX = TRUE),
+      rownames = FALSE
+    ) |>
+      DT::formatCurrency("price", digits = 0)
+  })
+  
+  # Save the (possibly subsetted) data as a CSV file
+  output$download_data <- downloadHandler(
+    filename = function() {
+      paste0("melbourne_housing_subset_", Sys.Date(), ".csv")
+    },
+    content = function(file) {
+      write_csv(subset_vals$data, file)
+    }
+  )
+  
+  
+}
+
+shinyApp(ui, server)
